@@ -69,7 +69,12 @@ void freeTree(BTNode *root) {
         free(root);
     }
 }
-
+BTNode *statement(void);
+BTNode *assign_expr(void);
+BTNode *or_expr(void);
+BTNode *and_expr(void);
+BTNode *xor_expr(void);
+BTNode *expr(void);
 // factor := INT | ADDSUB INT |
 //           INCDEC INT |
 //		   	 ID  | ADDSUB ID  | 
