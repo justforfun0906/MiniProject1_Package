@@ -6,7 +6,9 @@
 static TokenSet getToken(void);
 static TokenSet curToken = UNKNOWN;
 static char lexeme[MAXLEN];
-
+static int isVariableName(char c){
+    return isdigit(c) || c=='_'||isalpha(c);
+}
 TokenSet getToken(void)
 {
     int i = 0;
@@ -24,18 +26,27 @@ TokenSet getToken(void)
             c = fgetc(stdin);
         }
         ungetc(c, stdin);
+        if(i>=MAXLEN){//TODO: check is there an error type is for this case
+            fprintf(stderr, "Number too long\n");
+            exit(0);
+        }
         lexeme[i] = '\0';
         return INT;
     } else if (c == '+' || c == '-') {
-        c = fgetc(stdin);
-        if(c=='+' || c=='-'){
-            lexeme[0] = c;
-            lexeme[1] = '\0';
+        char next_c = fgetc(stdin);
+        lexeme[0] = c;
+        if(next_c==c){
+            lexeme[1] = next_c;
+            lexeme[2] = '\0';
             return INCDEC;
-        }else if(c=='='){
-            lexeme[0] = c;
-            lexeme[1] = '\0';
+        }else if(next_c=='='){
+            lexeme[1] = next_c;
+            lexeme[2] = '\0';
             return ADDSUB_ASSIGN;
+        }else{
+            lexeme[1] = '\0';
+            ungetc(next_c, stdin);//push back next_c
+            return ADDSUB;
         }
         lexeme[0] = c;
         lexeme[1] = '\0';
@@ -56,21 +67,33 @@ TokenSet getToken(void)
     } else if (c == ')') {
         strcpy(lexeme, ")");
         return RPAREN;
-    } else if (isalpha(c)) {
-        lexeme[0] = c;
-        lexeme[1] = '\0';
-        return ID;
     } else if (c == EOF) {
         return ENDFILE;
-    }else if(c=='&'){
+    } else if(c=='&'){
         strcpy(lexeme, "&");
         return AND;
-    }else if(c=='|'){
+    } else if(c=='|'){
         strcpy(lexeme, "|");
         return OR;    
-    }else if(c=='^'){
+    } else if(c=='^'){
         strcpy(lexeme, "^");
         return XOR;
+    } else if(isVariableName(c)){
+        lexeme[0] = c;
+        c = fgetc(stdin);
+        i = 1;
+        while (isVariableName(c) && i < MAXLEN) {
+            lexeme[i] = c;
+            ++i;
+            c = fgetc(stdin);
+        }
+        ungetc(c, stdin);
+        lexeme[i] = '\0';
+        if(i>=MAXLEN){
+            fprintf(stderr, "Variable name too long\n");
+            exit(0);
+        }
+        return ID; 
     }else {
         return UNKNOWN;
     }
