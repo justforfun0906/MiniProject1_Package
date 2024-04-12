@@ -27,6 +27,16 @@ TokenSet getToken(void)
         lexeme[i] = '\0';
         return INT;
     } else if (c == '+' || c == '-') {
+        c = fgetc(stdin);
+        if(c=='+' || c=='-'){
+            lexeme[0] = c;
+            lexeme[1] = '\0';
+            return INCDEC;
+        }else if(c=='='){
+            lexeme[0] = c;
+            lexeme[1] = '\0';
+            return ADDSUB_ASSIGN;
+        }
         lexeme[0] = c;
         lexeme[1] = '\0';
         return ADDSUB;
@@ -52,7 +62,16 @@ TokenSet getToken(void)
         return ID;
     } else if (c == EOF) {
         return ENDFILE;
-    } else {
+    }else if(c=='&'){
+        strcpy(lexeme, "&");
+        return AND;
+    }else if(c=='|'){
+        strcpy(lexeme, "|");
+        return OR;    
+    }else if(c=='^'){
+        strcpy(lexeme, "^");
+        return XOR;
+    }else {
         return UNKNOWN;
     }
 }
