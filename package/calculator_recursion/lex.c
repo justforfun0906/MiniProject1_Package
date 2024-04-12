@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "lex.h"
 
 static TokenSet getToken(void);
@@ -78,7 +79,7 @@ TokenSet getToken(void)
     } else if(c=='^'){
         strcpy(lexeme, "^");
         return XOR;
-    } else if(isVariableName(c)){
+    } else if(isVariableName(c)){//since if it is a number it is already checked
         lexeme[0] = c;
         c = fgetc(stdin);
         i = 1;

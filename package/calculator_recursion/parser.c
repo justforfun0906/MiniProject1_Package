@@ -71,7 +71,9 @@ void freeTree(BTNode *root) {
 }
 
 // factor := INT | ADDSUB INT |
+//           INCDEC INT |
 //		   	 ID  | ADDSUB ID  | 
+//           INCDEC ID|
 //		   	 ID ASSIGN expr |
 //		   	 LPAREN expr RPAREN |
 //		   	 ADDSUB LPAREN expr RPAREN
