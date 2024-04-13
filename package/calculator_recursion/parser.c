@@ -160,7 +160,24 @@ BTNode *or_expr_tail(BTNode *left){
         return left;
     }
 }
-
+// xor_expr := and_expr xor_expr_tail
+BTNode *xor_expr(void){
+    BTNode *node = and_expr();
+    return xor_expr_tail(node);
+}
+// xor_expr_tail := XOR and_expr xor_expr_tail | NiL
+BTNode *xor_expr_tail(BTNode *left){
+    BTNode *node = NULL;
+    if(match(XOR)){
+        node = makeNode(XOR, getLexeme());
+        advance();
+        node -> left = left;
+        node -> right = and_expr();
+        return xor_expr_tail(node);
+    }else{
+        return left;
+    }
+}
 // and_expr() = addsub_expr and_expr_tail
 BTNode *and_expr(void){
     BTNode *node = addsub_expr();
@@ -178,7 +195,54 @@ BTNode *and_expr_tail(BTNode* left){
     }else{
         return left;
     }
-
+}
+// addsub_expr := muldiv_expr addsub_expr_tail
+BTNode *addsub_expr(void){
+    BTNode *node = muldiv_expr();
+    return addsub_expr_tail(node);
+}
+// addsub_expr_tail := ADDSUB muldiv_expr addsub_expr_tail | NiL
+BTNode *addsub_expr_tail(BTNode *left){
+    BTNode *node = NULL;
+    if(match(ADDSUB)){
+        node = makeNode(ADDSUB, getLexeme());
+        advance();
+        node -> left = left;
+        node -> right = muldiv_expr();
+        return addsub_expr_tail(node);
+    }else{
+        return left;
+    }
+}
+// muldiv_expr := unary_expr muldiv_expr_tail
+BTNode *muldiv_expr(void){
+    BTNode *node = unary_expr();
+    return muldiv_expr_tail(node);
+}
+// muldiv_expr_tail := MULDIV unary_expr muldiv_expr_tail | NiL
+BTNode *muldiv_expr_tail(BTNode *left){
+    BTNode *node = NULL;
+    if(match(MULDIV)){
+        node = makeNode(MULDIV, getLexeme());
+        advance();
+        node -> left = left;
+        node -> right = unary_expr();
+        return muldiv_expr_tail(node);
+    }else{
+        return left;
+    }
+}
+// unary_expr := INCDEC factor | factor
+BTNode *unary_expr(void){
+    BTNode *retp = NULL;
+    if(match(INCDEC)){
+        retp = makeNode(INCDEC, getLexeme());
+        advance();
+        retp -> left = factor();
+    }else{
+        retp = factor();
+    }
+    return retp;
 }
 // factor := INT |
 //		   	 ID  |
@@ -232,48 +296,6 @@ BTNode *factor(void) {
         error(NOTNUMID);
     }
     return retp;
-}
-
-// term := factor term_tail
-BTNode *term(void) {
-    BTNode *node = factor();
-    return term_tail(node);
-}
-
-// term_tail := MULDIV factor term_tail | NiL
-BTNode *term_tail(BTNode *left) {
-    BTNode *node = NULL;
-
-    if (match(MULDIV)) {
-        node = makeNode(MULDIV, getLexeme());
-        advance();
-        node->left = left;
-        node->right = factor();
-        return term_tail(node);
-    } else {
-        return left;
-    }
-}
-
-// expr := term expr_tail
-BTNode *expr(void) {
-    BTNode *node = term();
-    return expr_tail(node);
-}
-
-// expr_tail := ADDSUB term expr_tail | NiL
-BTNode *expr_tail(BTNode *left) {
-    BTNode *node = NULL;
-
-    if (match(ADDSUB)) {
-        node = makeNode(ADDSUB, getLexeme());
-        advance();
-        node->left = left;
-        node->right = term();
-        return expr_tail(node);
-    } else {
-        return left;
-    }
 }
 
 void err(ErrorType errorNum) {
