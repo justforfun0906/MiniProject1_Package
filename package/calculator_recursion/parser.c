@@ -69,19 +69,121 @@ void freeTree(BTNode *root) {
         free(root);
     }
 }
-BTNode *statement(void);
+void statement();
 BTNode *assign_expr(void);
 BTNode *or_expr(void);
+BTNode *or_expr_tail(BTNode *left);
 BTNode *and_expr(void);
+BTNode *and_expr_tail(BTNode *left);
 BTNode *xor_expr(void);
-BTNode *expr(void);
-// factor := INT | ADDSUB INT |
-//           INCDEC INT |
-//		   	 ID  | ADDSUB ID  | 
+BTNode *xor_expr_tail(BTNode *left);
+BTNode *addsub_expr(void);
+BTNode *addsub_expr_tail(BTNode *left);
+BTNode *muldiv_expr(void);
+BTNode *muldiv_expr_tail(BTNode *left);
+BTNode *unary_expr(void);
+BTNode *factor(void);
+// statement := ENDFILE | END | expr END
+void statement(void) {
+    BTNode *retp = NULL;
+
+    if (match(ENDFILE)) {
+        exit(0);
+    } else if (match(END)) {
+        printf(">> ");
+        advance();
+    } else {
+        retp = expr();
+        if (match(END)) {
+            printf("%d\n", evaluateTree(retp));
+            printf("Prefix traversal: ");
+            printPrefix(retp);
+            printf("\n");
+            freeTree(retp);
+            printf(">> ");
+            advance();
+        } else {
+            error(SYNTAXERR);
+        }
+    }
+}
+
+// assign_expr := ID ASSIGN assign_expr | ID ADDSUB_ASSIGN assign_expr | or_expr
+// possible error(handled): left side of assignment must be a variable
+BTNode *assign_expr(void){
+    BTNode *retp = NULL, *left = NULL;
+    left = or_expr();
+    // don't need to call advance() here because or_expr() will call advance() in the end
+    // Since we have a practice that for every "makeNode" function, 
+    // we call advance() after it,
+    // to make sure the currToken is new and ready for the next "makeNode".
+    if(match(ASSIGN)){
+        if(left->data != ID){
+            error(NOTLVAL);
+        }else{
+            retp = makeNode(ASSIGN, getLexeme());
+            advance();
+            retp->left = left;
+            retp->right = assign_expr();
+        }
+    }else if(match(ADDSUB_ASSIGN)){
+        if(left->data != ID){
+            error(NOTLVAL);
+        }else{
+            retp = makeNode(ADDSUB_ASSIGN, getLexeme());
+            advance();
+            retp->left = left;
+            retp->right = assign_expr();
+        }
+    }else{
+        retp = left;
+    }
+    return retp;
+}
+
+// or_expr := xor_expr or_expr_tail
+BTNode *or_expr(void){
+    BTNode *node = xor_expr();
+    return or_expr_tail(node);
+}
+
+// or_expr_tail := OR xor_expr or_expr_tail | NiL
+BTNode *or_expr_tail(BTNode *left){
+    BTNode *node = NULL;
+    if(match(OR)){
+        node = makeNode(OR, getLexeme());
+        advance();
+        node -> left = left;
+        node -> right = xor_expr();
+        return or_expr_tail(node);
+    }else{
+        return left;
+    }
+}
+
+// and_expr() = addsub_expr and_expr_tail
+BTNode *and_expr(void){
+    BTNode *node = addsub_expr();
+    return and_expr_tail(node);
+}
+// and_expr_tail() = AND addsub_expr and_expr_tail | NiL
+BTNode *and_expr_tail(BTNode* left){
+    BTNode *node = NULL;
+    if(match(AND)){
+        node = makeNode(AND, getLexeme());
+        advance();
+        node -> left = left;
+        node -> right = addsub_expr();
+        return and_expr_tail(node);
+    }else{
+        return left;
+    }
+
+}
+// factor := INT |
+//		   	 ID  |
 //           INCDEC ID|
-//		   	 ID ASSIGN expr |
-//		   	 LPAREN expr RPAREN |
-//		   	 ADDSUB LPAREN expr RPAREN
+//		   	 LPAREN assign_expr RPAREN |
 BTNode *factor(void) {
     BTNode *retp = NULL, *left = NULL;
 
@@ -171,31 +273,6 @@ BTNode *expr_tail(BTNode *left) {
         return expr_tail(node);
     } else {
         return left;
-    }
-}
-
-// statement := ENDFILE | END | expr END
-void statement(void) {
-    BTNode *retp = NULL;
-
-    if (match(ENDFILE)) {
-        exit(0);
-    } else if (match(END)) {
-        printf(">> ");
-        advance();
-    } else {
-        retp = expr();
-        if (match(END)) {
-            printf("%d\n", evaluateTree(retp));
-            printf("Prefix traversal: ");
-            printPrefix(retp);
-            printf("\n");
-            freeTree(retp);
-            printf(">> ");
-            advance();
-        } else {
-            error(SYNTAXERR);
-        }
     }
 }
 
