@@ -86,6 +86,9 @@ void statement(void) {
             printf("Prefix traversal: ");
             printPrefix(retp);
             printf("\n");
+            printf("Postfix traversal: ");
+            printPostfix(retp);
+            printf("\n");
             freeTree(retp);
             printf(">> ");
             advance();

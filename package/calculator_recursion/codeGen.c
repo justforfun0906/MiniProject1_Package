@@ -95,3 +95,10 @@ void printPrefix(BTNode *root) {
         printPrefix(root->right);
     }
 }
+void printPostfix(BTNode *root) {
+    if (root != NULL) {
+        printPostfix(root->left);
+        printPostfix(root->right);
+        printf("%s ", root->lexeme);
+    }
+}

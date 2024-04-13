@@ -8,5 +8,5 @@ extern int evaluateTree(BTNode *root);
 
 // Print the syntax tree in prefix
 extern void printPrefix(BTNode *root);
-
+extern void printPostfix(BTNode *root);
 #endif // __CODEGEN__
