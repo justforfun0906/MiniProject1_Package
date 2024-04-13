@@ -66,6 +66,21 @@ int evaluateTree(BTNode *root) {
                 }
                 setval(root->left->lexeme, retval);
                 break;
+            case AND:
+                lv = evaluateTree(root->left);
+                rv = evaluateTree(root->right);
+                retval = lv & rv;
+                break;
+            case OR:
+                lv = evaluateTree(root->left);
+                rv = evaluateTree(root->right);
+                retval = lv | rv;
+                break;
+            case XOR:
+                lv = evaluateTree(root->left);
+                rv = evaluateTree(root->right);
+                retval = lv ^ rv;
+                break;
             default:
                 retval = 0;
         }
