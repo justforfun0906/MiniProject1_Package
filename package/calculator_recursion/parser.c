@@ -69,20 +69,7 @@ void freeTree(BTNode *root) {
         free(root);
     }
 }
-void statement();
-BTNode *assign_expr(void);
-BTNode *or_expr(void);
-BTNode *or_expr_tail(BTNode *left);
-BTNode *and_expr(void);
-BTNode *and_expr_tail(BTNode *left);
-BTNode *xor_expr(void);
-BTNode *xor_expr_tail(BTNode *left);
-BTNode *addsub_expr(void);
-BTNode *addsub_expr_tail(BTNode *left);
-BTNode *muldiv_expr(void);
-BTNode *muldiv_expr_tail(BTNode *left);
-BTNode *unary_expr(void);
-BTNode *factor(void);
+
 // statement := ENDFILE | END | expr END
 void statement(void) {
     BTNode *retp = NULL;
@@ -93,7 +80,7 @@ void statement(void) {
         printf(">> ");
         advance();
     } else {
-        retp = expr();
+        retp = assign_expr();
         if (match(END)) {
             printf("%d\n", evaluateTree(retp));
             printf("Prefix traversal: ");
@@ -273,7 +260,7 @@ BTNode *factor(void) {
         }
     } else if (match(LPAREN)) {
         advance();
-        retp = expr();
+        retp = assign_expr();
         if (match(RPAREN))
             advance();
         else

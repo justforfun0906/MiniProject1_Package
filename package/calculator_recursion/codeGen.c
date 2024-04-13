@@ -19,6 +19,18 @@ int evaluateTree(BTNode *root) {
                 retval = setval(root->left->lexeme, rv);
                 break;
             case ADDSUB:
+                if (root->left != NULL) {
+                    lv = evaluateTree(root->left);
+                }
+                if (root->right != NULL) {
+                    rv = evaluateTree(root->right);
+                }
+                if (strcmp(root->lexeme, "+") == 0) {
+                    retval = lv + rv;
+                } else if (strcmp(root->lexeme, "-") == 0) {
+                    retval = lv - rv;
+                }
+                break;
             case MULDIV:
                 lv = evaluateTree(root->left);
                 rv = evaluateTree(root->right);
@@ -33,6 +45,26 @@ int evaluateTree(BTNode *root) {
                         error(DIVZERO);
                     retval = lv / rv;
                 }
+                break;
+            case INCDEC:
+                if (root->left != NULL) {
+                    lv = evaluateTree(root->left);
+                }
+                if (strcmp(root->lexeme, "++") == 0) {
+                    retval = lv + 1;
+                } else if (strcmp(root->lexeme, "--") == 0) {
+                    retval = lv - 1;
+                }
+                break;
+            case ADDSUB_ASSIGN:
+                rv = evaluateTree(root->right);
+                lv = getval(root->left->lexeme);
+                if (strcmp(root->lexeme, "+=") == 0) {
+                    retval = lv + rv;
+                } else if (strcmp(root->lexeme, "-=") == 0) {
+                    retval = lv - rv;
+                }
+                setval(root->left->lexeme, retval);
                 break;
             default:
                 retval = 0;
