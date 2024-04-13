@@ -233,14 +233,19 @@ BTNode *muldiv_expr_tail(BTNode *left){
     }
 }
 // unary_expr := ADDSUB factor | factor
+// 
 BTNode *unary_expr(void){
-    BTNode *retp = NULL;
-    if(match(ADDSUB)){
-        retp = makeNode(ADDSUB, getLexeme());
+    int is_neg = 0;
+    while(match(ADDSUB)){
+        is_neg ^= getLexeme()[0]=='-';
         advance();
-        retp -> left = factor();
-    }else{
-        retp = factor();
+    }
+    BTNode *retp = factor();
+    if(is_neg){//making the node = 0 - factor value
+        BTNode *node = makeNode(ADDSUB, "-");
+        node -> left = makeNode(INT, "0");
+        node -> right = retp;
+        retp = node;
     }
     return retp;
 }
@@ -257,7 +262,7 @@ BTNode *factor(void) {
     } else if (match(ID)) {
         retp = makeNode(ID, getLexeme());
         advance();
-    } else if (match(INCDEC)) {
+    } else if (match(INCDEC)) {//INCDEC must be followed by ID
         retp = makeNode(INCDEC, getLexeme());
         advance();
         if (match(ID)) {
