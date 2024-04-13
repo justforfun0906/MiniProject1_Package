@@ -89,6 +89,8 @@ void statement(void) {
             printf("Postfix traversal: ");
             printPostfix(retp);
             printf("\n");
+            printf("Assembly code: \n");
+            printAssemble(retp);
             freeTree(retp);
             printf(">> ");
             advance();
