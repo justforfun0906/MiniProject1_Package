@@ -232,11 +232,11 @@ BTNode *muldiv_expr_tail(BTNode *left){
         return left;
     }
 }
-// unary_expr := INCDEC factor | factor
+// unary_expr := ADDSUB factor | factor
 BTNode *unary_expr(void){
     BTNode *retp = NULL;
-    if(match(INCDEC)){
-        retp = makeNode(INCDEC, getLexeme());
+    if(match(ADDSUB)){
+        retp = makeNode(ADDSUB, getLexeme());
         advance();
         retp -> left = factor();
     }else{
@@ -255,33 +255,14 @@ BTNode *factor(void) {
         retp = makeNode(INT, getLexeme());
         advance();
     } else if (match(ID)) {
-        left = makeNode(ID, getLexeme());
+        retp = makeNode(ID, getLexeme());
         advance();
-        if (!match(ASSIGN)) {
-            retp = left;
-        } else {
-            retp = makeNode(ASSIGN, getLexeme());
-            advance();
-            retp->left = left;
-            retp->right = expr();
-        }
-    } else if (match(ADDSUB)) {
-        retp = makeNode(ADDSUB, getLexeme());
-        retp->left = makeNode(INT, "0");
+    } else if (match(INCDEC)) {
+        retp = makeNode(INCDEC, getLexeme());
         advance();
-        if (match(INT)) {
-            retp->right = makeNode(INT, getLexeme());
+        if (match(ID)) {
+            retp->left = makeNode(ID, getLexeme());
             advance();
-        } else if (match(ID)) {
-            retp->right = makeNode(ID, getLexeme());
-            advance();
-        } else if (match(LPAREN)) {
-            advance();
-            retp->right = expr();
-            if (match(RPAREN))
-                advance();
-            else
-                error(MISPAREN);
         } else {
             error(NOTNUMID);
         }
@@ -297,7 +278,6 @@ BTNode *factor(void) {
     }
     return retp;
 }
-
 void err(ErrorType errorNum) {
     if (PRINTERR) {
         fprintf(stderr, "error: ");
