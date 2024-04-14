@@ -75,14 +75,15 @@ void statement(void) {
     BTNode *retp = NULL;
 
     if (match(ENDFILE)) {
+        printf("MOV r0 [0]\nMOV r1 [1]\nMOV r2 [2]\nEXIT\n");
         exit(0);
     } else if (match(END)) {
-        printf(">> ");
+        //printf(">> ");
         advance();
     } else {
         retp = assign_expr();
         if (match(END)) {
-            printf("%d\n", evaluateTree(retp));
+            /*printf("%d\n", evaluateTree(retp));
             printf("Prefix traversal: ");
             printPrefix(retp);
             printf("\n");
@@ -90,9 +91,10 @@ void statement(void) {
             printPostfix(retp);
             printf("\n");
             printf("Assembly code: \n");
+            */
             printAssemble(retp);
             freeTree(retp);
-            printf(">> ");
+            //printf(">> ");
             advance();
         } else {
             error(SYNTAXERR);

@@ -29,8 +29,9 @@
 //		   	      ADDSUB LPAREN expr RPAREN
 
 int main() {
+    //freopen("input.txt", "w", stdout);
     initTable();
-    printf(">> ");
+    //printf(">> ");
     while (1) {
         statement();
     }

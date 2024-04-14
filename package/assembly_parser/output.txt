@@ -1,0 +1,54 @@
+**********************************
+ERROR at '>> MOV r0 3'
+ => un-define opcode: '>>'
+**********************************
+MOV  | REG  : 1    | CONST: 5    | 10cc   |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+**********************************
+ERROR at '>> MOV r0 10'
+ => un-define opcode: '>>'
+**********************************
+MOV  | REG  : 4    | ADDR : 0    | 200cc  |
+**********************************
+ERROR at '>> MOV r0 1'
+ => un-define opcode: '>>'
+**********************************
+**********************************
+ERROR at 'MOV r8 [0]'
+ => register out of range: 'r8'
+**********************************
+**********************************
+ERROR at '>> MOV r0 0'
+ => un-define opcode: '>>'
+**********************************
+MOV  | REG  : 1    | ADDR : 8    | 200cc  |
+SUB  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 1    | CONST: 1    | 10cc   |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 4    | ADDR : 0    | 200cc  |
+**********************************
+ERROR at '>> MOV r0 [0]'
+ => un-define opcode: '>>'
+**********************************
+MOV  | REG  : 1    | CONST: 4    | 10cc   |
+DIV  | REG  : 0    | REG  : 1    | 50cc   |
+**********************************
+ERROR at 'MOV r8 [0]'
+ => register out of range: 'r8'
+**********************************
+**********************************
+ERROR at '>> MOV r0 [8]'
+ => un-define opcode: '>>'
+**********************************
+MOV  | REG  : 1    | CONST: 100  | 10cc   |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+**********************************
+ERROR ending without EXIT
+**********************************
+
+r[0] = 0
+r[1] = 100
+r[2] = 69678340
+Total clock cycles are 1130
