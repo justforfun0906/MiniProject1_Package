@@ -111,12 +111,12 @@ void printCode(BTNode *root){
                 break;
             }
         }
-        printf("MOV r%d [%d]\n", stack_top++, pos);
+        printf("MOV r%d [%d]\n", stack_top, pos);
         if(strcmp(root->lexeme, "++")==0){
-            printf("ADD r%d 1\n", stack_top);
+            printf("ADD r%d 1\n", stack_top++);
             //fprintf(stdout, "ADD r%d 1\n", stack_top);
         }else if(strcmp(root->lexeme, "--")==0){
-            printf("SUB r%d 1\n", stack_top);
+            printf("SUB r%d 1\n", stack_top++);
             //fprintf(stdout, "SUB r%d 1\n", stack_top);
         }
     }
@@ -181,7 +181,7 @@ void printAssemble(BTNode *root) {
                     break;
                 }
             }
-            printf("MOV r%d [%d]\n", pos, stack_top-1);
+            printf("MOV [%d] r%d\n", pos, stack_top-1);
             //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
             stack_top--;
         }else{

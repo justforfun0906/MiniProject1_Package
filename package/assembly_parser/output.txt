@@ -1,54 +1,128 @@
-**********************************
-ERROR at '>> MOV r0 3'
- => un-define opcode: '>>'
-**********************************
-MOV  | REG  : 1    | CONST: 5    | 10cc   |
+MOV  | REG  : 0    | CONST: 100  | 10cc   |
+MOV  | REG  : 1    | CONST: 10   | 10cc   |
+MOV  | REG  : 2    | ADDR : 4    | 200cc  |
+MUL  | REG  : 1    | REG  : 2    | 30cc   |
 ADD  | REG  : 0    | REG  : 1    | 10cc   |
-MOV  | REG  : 0    | ADDR : 0    | 200cc  |
-**********************************
-ERROR at '>> MOV r0 10'
- => un-define opcode: '>>'
-**********************************
-MOV  | REG  : 4    | ADDR : 0    | 200cc  |
-**********************************
-ERROR at '>> MOV r0 1'
- => un-define opcode: '>>'
-**********************************
-**********************************
-ERROR at 'MOV r8 [0]'
- => register out of range: 'r8'
-**********************************
-**********************************
-ERROR at '>> MOV r0 0'
- => un-define opcode: '>>'
-**********************************
-MOV  | REG  : 1    | ADDR : 8    | 200cc  |
-SUB  | REG  : 0    | REG  : 1    | 10cc   |
-MOV  | REG  : 1    | CONST: 1    | 10cc   |
-ADD  | REG  : 0    | REG  : 1    | 10cc   |
-MOV  | REG  : 4    | ADDR : 0    | 200cc  |
-**********************************
-ERROR at '>> MOV r0 [0]'
- => un-define opcode: '>>'
-**********************************
-MOV  | REG  : 1    | CONST: 4    | 10cc   |
-DIV  | REG  : 0    | REG  : 1    | 50cc   |
-**********************************
-ERROR at 'MOV r8 [0]'
- => register out of range: 'r8'
-**********************************
-**********************************
-ERROR at '>> MOV r0 [8]'
- => un-define opcode: '>>'
-**********************************
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 8    | 200cc  |
 MOV  | REG  : 1    | CONST: 100  | 10cc   |
+MOV  | REG  : 2    | CONST: 10   | 10cc   |
+MUL  | REG  : 1    | REG  : 2    | 30cc   |
+MOV  | REG  : 2    | CONST: 50   | 10cc   |
+DIV  | REG  : 1    | REG  : 2    | 50cc   |
+MOV  | REG  : 2    | CONST: 10   | 10cc   |
+MUL  | REG  : 1    | REG  : 2    | 30cc   |
 ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | ADDR : 4    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | CONST: 10   | 10cc   |
+MOV  | REG  : 1    | ADDR : 0    | 200cc  |
+MUL  | REG  : 0    | REG  : 1    | 30cc   |
+MOV  | REG  : 1    | CONST: 100  | 10cc   |
+DIV  | REG  : 0    | REG  : 1    | 50cc   |
+MOV  | ADDR : 8    | REG  : 0    | 200cc  |
 MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 4    | 200cc  |
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 8    | 200cc  |
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+MOV  | REG  : 1    | ADDR : 0    | 200cc  |
+XOR  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+MOV  | REG  : 1    | ADDR : 4    | 200cc  |
+OR   | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | ADDR : 4    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+MOV  | REG  : 1    | ADDR : 8    | 200cc  |
+AND  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | ADDR : 8    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | CONST: 3    | 10cc   |
+MOV  | REG  : 1    | CONST: 1    | 10cc   |
+MOV  | REG  : 2    | CONST: 2    | 10cc   |
+ADD  | REG  : 1    | REG  : 2    | 10cc   |
+MUL  | REG  : 0    | REG  : 1    | 30cc   |
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
 **********************************
-ERROR ending without EXIT
+ERROR at 'MOV [0] r-1'
+ => register out of range: 'r-1'
 **********************************
+**********************************
+ERROR at 'MOV [0] r-2'
+ => register out of range: 'r-2'
+**********************************
+**********************************
+ERROR at 'MOV [0] r-3'
+ => register out of range: 'r-3'
+**********************************
+**********************************
+ERROR at 'MOV r-3 0'
+ => register out of range: 'r-3'
+**********************************
+**********************************
+ERROR at 'MOV r-2 [0]'
+ => register out of range: 'r-2'
+**********************************
+**********************************
+ERROR at 'MOV r-1 [0]'
+ => register out of range: 'r-1'
+**********************************
+**********************************
+ERROR at 'ADD r-2 r-1'
+ => register out of range: 'r-2'
+**********************************
+**********************************
+ERROR at 'MOV r-1 [0]'
+ => register out of range: 'r-1'
+**********************************
+**********************************
+ERROR at 'ADD r-2 r-1'
+ => register out of range: 'r-2'
+**********************************
+**********************************
+ERROR at 'SUB r-3 r-2'
+ => register out of range: 'r-3'
+**********************************
+**********************************
+ERROR at 'MOV [0] r-3'
+ => register out of range: 'r-3'
+**********************************
+**********************************
+ERROR at 'MOV r-3 [0]'
+ => register out of range: 'r-3'
+**********************************
+**********************************
+ERROR at 'ADD r-3 1'
+ => register out of range: 'r-3'
+**********************************
+**********************************
+ERROR at 'MOV r-1 [0]'
+ => register out of range: 'r-1'
+**********************************
+**********************************
+ERROR at 'SUB r-1 1'
+ => register out of range: 'r-1'
+**********************************
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+MOV  | REG  : 1    | ADDR : 0    | 200cc  |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 1    | ADDR : 0    | 200cc  |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 1    | ADDR : 0    | 200cc  |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | REG  : 1    | ADDR : 0    | 200cc  |
+ADD  | REG  : 0    | REG  : 1    | 10cc   |
+MOV  | ADDR : 0    | REG  : 0    | 200cc  |
+MOV  | REG  : 0    | ADDR : 0    | 200cc  |
+MOV  | REG  : 1    | ADDR : 4    | 200cc  |
+MOV  | REG  : 2    | ADDR : 8    | 200cc  |
+EXIT | CONST: 0    |             | 20cc   |
+-------------------------------------------
+exit normally
 
-r[0] = 0
-r[1] = 100
-r[2] = 69678340
-Total clock cycles are 1130
+r[0] = 45
+r[1] = 200
+r[2] = 0
+Total clock cycles are 6880

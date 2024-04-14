@@ -73,9 +73,8 @@ void freeTree(BTNode *root) {
 // statement := ENDFILE | END | expr END
 void statement(void) {
     BTNode *retp = NULL;
-
     if (match(ENDFILE)) {
-        printf("MOV r0 [0]\nMOV r1 [1]\nMOV r2 [2]\nEXIT\n");
+        printf("MOV r0 [0]\nMOV r1 [4]\nMOV r2 [8]\nEXIT 0\n");
         exit(0);
     } else if (match(END)) {
         //printf(">> ");

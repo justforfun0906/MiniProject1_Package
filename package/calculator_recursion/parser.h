@@ -11,6 +11,7 @@
 // Call this macro to print error message and exit the program
 // This will also print where you called it in your program
 #define error(errorNum) { \
+    printf("the expression cannot be evaluated\n"); \
     if (PRINTERR) \
         fprintf(stderr, "error() called at %s:%d: ", __FILE__, __LINE__); \
     err(errorNum); \
