@@ -99,45 +99,51 @@ void printCode(BTNode *root){
         }
         printf("MOV [%d] r%d\n", pos, stack_top-2);
         stack_top-=2;
-    }else if(root->data==ADDSUB){//TODO: think about how to implement this
+    }if(root->data==ADDSUB){//TODO: think about how to implement this
         if(strcmp(root->lexeme, "+")==0){
             printf("ADD r%d r%d\n", stack_top-2, stack_top-1);
         }else if(strcmp(root->lexeme, "-")==0){
             printf("SUB r%d r%d\n", stack_top-2, stack_top-1);
         }
         stack_top--;
-    }else if(root->data==MULDIV){
+    }if(root->data==MULDIV){
         if(strcmp(root->lexeme, "*")==0){
             printf("MUL r%d r%d\n", stack_top-2, stack_top-1);
         }else if(strcmp(root->lexeme, "/")==0){
             printf("DIV r%d r%d\n", stack_top-2, stack_top-1);
         }
         stack_top--;
-    }else if(root->data==OR){
-        printf("OR ");
+    }if(root->data==OR){
+        printf("OR r%d r%d\n", stack_top-2, stack_top-1);
+        stack_top--;
+    }if(root->data==AND){
+        printf("AND r%d r%d\n", stack_top-2, stack_top-1);
+        stack_top--;
+    }if(root->data==XOR){
+        printf("XOR r%d r%d\n", stack_top-2, stack_top-1);
+        stack_top--;
+    }if(root->data==ADDSUB_ASSIGN){
+        if(strcmp(root->lexeme, "+=")==0){
+            printf("ADD r%d r%d\n", stack_top-2, stack_top-1);
+        }else if(strcmp(root->lexeme, "-=")==0){
+            printf("SUB r%d r%d\n", stack_top-2, stack_top-1);
+        }
+        int pos = 0;
+        for(int i=0;i<sbcount;i++){
+            if(strcmp(table[i].name, root->left->lexeme)==0){
+                pos = i;
+                break;
+            }
+        }
+        printf("MOV [%d] r%d\n", pos, stack_top-2);
+        stack_top-=2;
     }
 }
 void printAssemble(BTNode *root) {
-    if (root->left != NULL && root->right) {
-        switch (root->data){
-        case ASSIGN:
-            printAssemble(root->left);
-            printAssemble(root->right);
-            printCode(root);
-            break;
-        case ADDSUB:
-            printAssemble(root->left);
-            printAssemble(root->right);
-            printCode(root);
-            break;
-        case MULDIV:
-            printAssemble(root->left);
-            printAssemble(root->right);
-            printCode(root);
-            break;
-        default:
-            break;
-        }
+    if (root->left != NULL && root->right!=NULL) {
+        printAssemble(root->left);
+        printAssemble(root->right);
+        printCode(root);
     }else{//leaf node
         printf("MOV r%d %s\n", stack_top, root->lexeme);
         stack_top++;
