@@ -120,13 +120,20 @@ BTNode *assign_expr(void){
             retp->right = assign_expr();
         }
     }else if(match(ADDSUB_ASSIGN)){
+        //FIXME: can turn ADDSUB_ASSIGN into ASSIGN+ADDSUB
+        //however error = double free
         if(left->data != ID){
             error(NOTLVAL);
         }else{
-            retp = makeNode(ADDSUB_ASSIGN, getLexeme());
-            advance();
+            char* str = getLexeme();
+            retp = makeNode(ASSIGN, "=");
             retp->left = left;
-            retp->right = assign_expr();
+            if(str[0]=='+')retp->right = makeNode(ADDSUB, "+");
+            else retp->right = makeNode(ADDSUB, "-");
+            BTNode* temp_left = makeNode(ID, left->lexeme);
+            retp->right->left = temp_left;
+            advance();
+            retp->right->right = assign_expr();
         }
     }else{
         retp = left;

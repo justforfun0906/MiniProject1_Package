@@ -150,26 +150,10 @@ void printCode(BTNode *root){
         printf("XOR r%d r%d\n", stack_top-2, stack_top-1);
         //fprintf(stdout, "XOR r%d r%d\n", stack_top-2, stack_top-1);
         stack_top--;
-    }if(root->data==ADDSUB_ASSIGN){
-        if(strcmp(root->lexeme, "+=")==0){
-            printf("ADD r%d r%d\n", stack_top-2, stack_top-1);
-            //fprintf(stdout, "ADD r%d r%d\n", stack_top-2, stack_top-1);
-        }else if(strcmp(root->lexeme, "-=")==0){
-            printf("SUB r%d r%d\n", stack_top-2, stack_top-1);
-            //fprintf(stdout, "SUB r%d r%d\n", stack_top-2, stack_top-1);
-        }
-        int pos = 0;
-        for(int i=0;i<sbcount;i++){
-            if(strcmp(table[i].name, root->left->lexeme)==0){
-                pos = i*4;
-                break;
-            }
-        }
-        printf("MOV [%d] r%d\n", pos, stack_top-2);
-        //fprintf(stdout, "MOV [%d] r%d\n", pos, stack_top-2);
-        stack_top-=2;
     }
 }
+//TODO: check where the stack_top is wrong(overly decreased)
+//TODO: check the ADDSUB_ASSIGN and INCDEC (no more ADDSUB_ASSIGN)
 void printAssemble(BTNode *root) {
     if (root->left != NULL && root->right!=NULL) {
         if(root->data==ASSIGN){
@@ -184,7 +168,8 @@ void printAssemble(BTNode *root) {
             printf("MOV [%d] r%d\n", pos, stack_top-1);
             //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
             stack_top--;
-        }else{
+        }
+        else{
             printAssemble(root->left);
             printAssemble(root->right);
             printCode(root);
