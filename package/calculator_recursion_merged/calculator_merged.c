@@ -18,16 +18,14 @@ typedef enum {
     AND, OR, XOR
 } TokenSet;
 
-TokenSet getToken(void);
-TokenSet curToken = UNKNOWN;
-char lexeme[MAXLEN];
+// Test if a token matches the current token 
+extern int match(TokenSet token);
 
-// Test if a token matches the current token
-int match(TokenSet token);
 // Get the next token
-void advance(void);
+extern void advance(void);
+
 // Get the lexeme of the current token
-char *getLexeme(void);
+extern char *getLexeme(void);
 
 
 // for parser
