@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "codeGen.h"
-static int stack_top = 0;
+int stack_top = 0;
 int evaluateTree(BTNode *root) {
     int retval = 0, lv = 0, rv = 0;
 
@@ -154,6 +154,7 @@ void printCode(BTNode *root){
 }
 //TODO: check where the stack_top is wrong(overly decreased)
 //TODO: check the ADDSUB_ASSIGN and INCDEC (no more ADDSUB_ASSIGN)
+//FIXME: INCDEC doesn't make the value stored in the memory
 void printAssemble(BTNode *root) {
     if (root->left != NULL && root->right!=NULL) {
         if(root->data==ASSIGN){
@@ -167,7 +168,7 @@ void printAssemble(BTNode *root) {
             }
             printf("MOV [%d] r%d\n", pos, stack_top-1);
             //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
-            stack_top--;
+            //stack_top--;
         }
         else{
             printAssemble(root->left);

@@ -10,4 +10,5 @@ extern int evaluateTree(BTNode *root);
 extern void printPrefix(BTNode *root);
 extern void printPostfix(BTNode *root);
 extern void printAssemble(BTNode *root);
+extern int stack_top;
 #endif // __CODEGEN__

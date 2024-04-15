@@ -4,9 +4,8 @@
 #include "parser.h"
 #include "codeGen.h"
 
-int sbcount = 0;
 Symbol table[TBLSIZE];
-
+int sbcount = 0;
 void initTable(void) {
     strcpy(table[0].name, "x");
     table[0].val = 0;
@@ -82,7 +81,7 @@ void statement(void) {
     } else {
         retp = assign_expr();
         if (match(END)) {
-            /*printf("%d\n", evaluateTree(retp));
+            printf("%d\n", evaluateTree(retp));
             printf("Prefix traversal: ");
             printPrefix(retp);
             printf("\n");
@@ -90,10 +89,10 @@ void statement(void) {
             printPostfix(retp);
             printf("\n");
             printf("Assembly code: \n");
-            */
             printAssemble(retp);
             freeTree(retp);
             //printf(">> ");
+            stack_top --;
             advance();
         } else {
             error(SYNTAXERR);

@@ -71,5 +71,5 @@ extern BTNode *factor(void);
 
 // Print error message and exit the program
 extern void err(ErrorType errorNum);
-int sbcount;
+extern int sbcount;
 #endif // __PARSER__
