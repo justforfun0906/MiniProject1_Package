@@ -15,6 +15,14 @@ void initTable(void) {
     table[2].val = 0;
     sbcount = 3;
 }
+int getpos(char *str){
+    for(int i = 0; i < sbcount; i++){
+        if(strcmp(str, table[i].name) == 0){
+            return i*4;
+        }
+    }
+    return -1;
+}
 
 int getval(char *str) {
     int i = 0;

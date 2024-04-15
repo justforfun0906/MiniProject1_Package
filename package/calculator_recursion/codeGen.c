@@ -94,23 +94,13 @@ void printCode(BTNode *root){
     }
     if(root->data==ID){
         int pos = 0;
-        for(int i=0;i<sbcount;i++){
-            if(strcmp(table[i].name, root->lexeme)==0){
-                pos = i*4;
-                break;
-            }
-        }
+        pos = getpos(root->lexeme);
         printf("MOV r%d [%d]\n", stack_top, pos);
         //fprintf(stdout, "MOV r%d [%d]\n", stack_top, pos);
     }
     if(root->data==INCDEC){
         int pos = 0;
-        for(int i=0;i<sbcount;i++){
-            if(strcmp(table[i].name, root->left->lexeme)==0){
-                pos = i*4;
-                break;
-            }
-        }
+        pos = getpos(root->left->lexeme);
         printf("MOV r%d [%d]\n", stack_top, pos);
         if(strcmp(root->lexeme, "++")==0){
             printf("ADD r%d 1\n", stack_top++);
@@ -160,12 +150,7 @@ void printAssemble(BTNode *root) {
         if(root->data==ASSIGN){
             printAssemble(root->right);
             int pos = 0;
-            for(int i=0;i<sbcount;i++){
-                if(strcmp(table[i].name, root->left->lexeme)==0){
-                    pos = i*4;
-                    break;
-                }
-            }
+            pos = getpos(root->left->lexeme);
             printf("MOV [%d] r%d\n", pos, stack_top-1);
             //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
             //stack_top--;
