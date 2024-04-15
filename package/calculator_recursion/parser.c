@@ -16,12 +16,14 @@ void initTable(void) {
     sbcount = 3;
 }
 int getpos(char *str){
-    for(int i = 0; i < sbcount; i++){
-        if(strcmp(str, table[i].name) == 0){
-            return i*4;
+    int ans = -1;
+    for(int i=0;i<sbcount;i++){
+        if(strcmp(table[i].name, str)==0){
+            ans = i*4;
+            break;
         }
     }
-    return -1;
+    return ans;
 }
 
 int getval(char *str) {
@@ -89,7 +91,7 @@ void statement(void) {
     } else {
         retp = assign_expr();
         if (match(END)) {
-            printf("%d\n", evaluateTree(retp));
+            /*printf("%d\n", evaluateTree(retp));
             printf("Prefix traversal: ");
             printPrefix(retp);
             printf("\n");
@@ -97,6 +99,7 @@ void statement(void) {
             printPostfix(retp);
             printf("\n");
             printf("Assembly code: \n");
+            */
             printAssemble(retp);
             freeTree(retp);
             //printf(">> ");
@@ -127,8 +130,6 @@ BTNode *assign_expr(void){
             retp->right = assign_expr();
         }
     }else if(match(ADDSUB_ASSIGN)){
-        //FIXME: can turn ADDSUB_ASSIGN into ASSIGN+ADDSUB
-        //however error = double free
         if(left->data != ID){
             error(NOTLVAL);
         }else{

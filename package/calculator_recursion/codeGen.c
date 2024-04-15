@@ -94,6 +94,7 @@ void printCode(BTNode *root){
     }
     if(root->data==ID){
         int pos = 0;
+        getval(root->lexeme);
         pos = getpos(root->lexeme);
         printf("MOV r%d [%d]\n", stack_top, pos);
         //fprintf(stdout, "MOV r%d [%d]\n", stack_top, pos);
@@ -101,14 +102,18 @@ void printCode(BTNode *root){
     if(root->data==INCDEC){
         int pos = 0;
         pos = getpos(root->left->lexeme);
-        printf("MOV r%d [%d]\n", stack_top, pos);
+        printf("MOV r%d [%d]\n", stack_top++, pos);
         if(strcmp(root->lexeme, "++")==0){
-            printf("ADD r%d 1\n", stack_top++);
+            printf("MOV r%d 1\n", stack_top);
+            printf("ADD r%d r%d\n", stack_top-1, stack_top);
             //fprintf(stdout, "ADD r%d 1\n", stack_top);
         }else if(strcmp(root->lexeme, "--")==0){
-            printf("SUB r%d 1\n", stack_top++);
+            printf("MOV r%d 1\n", stack_top);
+            printf("SUB r%d r%d\n", stack_top-1, stack_top);
             //fprintf(stdout, "SUB r%d 1\n", stack_top);
         }
+        printf("MOV [%d] r%d\n", pos, stack_top-1);
+        stack_top--;
     }
     if(root->data==ADDSUB){//TODO: think about how to implement this
         if(strcmp(root->lexeme, "+")==0){
@@ -149,8 +154,15 @@ void printAssemble(BTNode *root) {
     if (root->left != NULL && root->right!=NULL) {
         if(root->data==ASSIGN){
             printAssemble(root->right);
+            getval(root->left->lexeme);
             int pos = 0;
             pos = getpos(root->left->lexeme);
+            /*for(int i=0;i<sbcount;i++){
+                if(strcmp(table[i].name, root->left->lexeme)==0){
+                    pos = i*4;
+                    break;
+                }
+            }*/
             printf("MOV [%d] r%d\n", pos, stack_top-1);
             //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
             //stack_top--;
