@@ -322,6 +322,7 @@ void statement(void) {
             printf("Assembly code: \n");
             */
             printAssemble(retp);
+            int temp = evaluateTree(retp);
             freeTree(retp);
             //printf(">> ");
             stack_top --;
@@ -590,9 +591,13 @@ int evaluateTree(BTNode *root) {
                 } else if (strcmp(root->lexeme, "*") == 0) {
                     retval = lv * rv;
                 } else if (strcmp(root->lexeme, "/") == 0) {
-                    if (rv == 0)
+                    if (rv == 0&&root->right->data==INT){
                         error(DIVZERO);
-                    retval = lv / rv;
+                    }
+                    else if(rv == 0) {
+                        retval = 0;
+                    }
+                    else retval = lv / rv;
                 }
                 break;
             case INCDEC:
@@ -661,6 +666,8 @@ void printCode(BTNode *root){
     if(root->data==INT){
         printf("MOV r%d %d\n", stack_top, atoi(root->lexeme));
     }
+    //FIXME: getval should adding new variable to the table, if a variable is not found, there should be an error
+    //TODO: should add a new function to add new variable to the table
     if(root->data==ID){
         int pos = 0;
         check_addNewVariable(root->lexeme);
@@ -681,11 +688,25 @@ void printCode(BTNode *root){
         printf("MOV [%d] r%d\n", pos, stack_top-1);
         stack_top--;
     }
-    if(root->data==ADDSUB){//TODO: think about how to implement this
+    if(root->data==ADDSUB){
         if(strcmp(root->lexeme, "+")==0){
             printf("ADD r%d r%d\n", stack_top-2, stack_top-1);
         }else if(strcmp(root->lexeme, "-")==0){
             printf("SUB r%d r%d\n", stack_top-2, stack_top-1);
+        }
+        if(root->left->data==INT&&root->right->data==INT){
+            root->data = INT;
+            if(strcmp(root->lexeme, "+")==0){
+                int temp = atoi(root->left->lexeme)+atoi(root->right->lexeme);
+                char* str= (char*)malloc(sizeof(char)*MAXLEN);
+                sprintf(str, "%d", temp);
+                strcpy(root->lexeme, str);
+            }else if(strcmp(root->lexeme, "-")==0){
+                int temp = atoi(root->left->lexeme)-atoi(root->right->lexeme);
+                char* str= (char*)malloc(sizeof(char)*MAXLEN);
+                sprintf(str, "%d", temp);
+                strcpy(root->lexeme, str);
+            }
         }
         stack_top--;
     }if(root->data==MULDIV){
@@ -694,15 +715,53 @@ void printCode(BTNode *root){
         }else if(strcmp(root->lexeme, "/")==0){
             printf("DIV r%d r%d\n", stack_top-2, stack_top-1);
         }
+        if(root->left->data==INT&&root->right->data==INT){
+            root->data = INT;
+            if(strcmp(root->lexeme, "*")==0){
+                int temp = atoi(root->left->lexeme)*atoi(root->right->lexeme);
+                char* str= (char*)malloc(sizeof(char)*MAXLEN);
+                sprintf(str, "%d", temp);
+                strcpy(root->lexeme, str);
+            }else if(strcmp(root->lexeme, "/")==0){
+                if(root->right->data==INT&&atoi(root->right->lexeme)==0){
+                    error(DIVZERO);
+                }
+                int temp = atoi(root->left->lexeme)/atoi(root->right->lexeme);
+                char* str= (char*)malloc(sizeof(char)*MAXLEN);
+                sprintf(str, "%d", temp);
+                strcpy(root->lexeme, str);
+            }
+        }
         stack_top--;
     }if(root->data==OR){
         printf("OR r%d r%d\n", stack_top-2, stack_top-1);
+        if(root->left->data==INT&&root->right->data==INT){
+            root->data = INT;
+            int temp = atoi(root->left->lexeme)|atoi(root->right->lexeme);
+            char* str= (char*)malloc(sizeof(char)*MAXLEN);
+            sprintf(str, "%d", temp);
+            strcpy(root->lexeme, str);
+        }
         stack_top--;
     }if(root->data==AND){
         printf("AND r%d r%d\n", stack_top-2, stack_top-1);
+        if(root->left->data==INT&&root->right->data==INT){
+            root->data = INT;
+            int temp = atoi(root->left->lexeme)&atoi(root->right->lexeme);
+            char* str= (char*)malloc(sizeof(char)*MAXLEN);
+            sprintf(str, "%d", temp);
+            strcpy(root->lexeme, str);
+        }
         stack_top--;
     }if(root->data==XOR){
         printf("XOR r%d r%d\n", stack_top-2, stack_top-1);
+        if(root->left->data==INT&&root->right->data==INT){
+            root->data = INT;
+            int temp = atoi(root->left->lexeme)^atoi(root->right->lexeme);
+            char* str= (char*)malloc(sizeof(char)*MAXLEN);
+            sprintf(str, "%d", temp);
+            strcpy(root->lexeme, str);
+        }
         stack_top--;
     }
 }
