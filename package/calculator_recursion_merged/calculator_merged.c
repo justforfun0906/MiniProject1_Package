@@ -32,12 +32,11 @@ extern char *getLexeme(void);
 
 // Set PRINTERR to 1 to print error message while calling error()
 // Make sure you set PRINTERR to 0 before you submit your code
-#define PRINTERR 1
+#define PRINTERR 0
 
 // Call this macro to print error message and exit the program
 // This will also print where you called it in your program
 #define error(errorNum) { \
-    printf("the expression cannot be evaluated\n"); \
     if (PRINTERR) \
         fprintf(stderr, "error() called at %s:%d: ", __FILE__, __LINE__); \
     err(errorNum); \
@@ -139,7 +138,7 @@ TokenSet getToken(void)
         }
         ungetc(c, stdin);
         if(i>=MAXLEN){//TODO: check is there an error type is for this case
-            fprintf(stderr, "Number too long\n");
+            error(SYNTAXERR);
             exit(0);
         }
         lexeme[i] = '\0';
@@ -202,7 +201,7 @@ TokenSet getToken(void)
         ungetc(c, stdin);
         lexeme[i] = '\0';
         if(i>=MAXLEN){
-            fprintf(stderr, "Variable name too long\n");
+            error(SYNTAXERR);
             exit(0);
         }
         return ID; 
@@ -245,11 +244,10 @@ int getpos(char *str){
     int ans = -1;
     for(int i=0;i<sbcount;i++){
         if(strcmp(table[i].name, str)==0){
-            ans = i*4;
-            break;
+            return i*4;
         }
     }
-    return ans;
+    error(NOTFOUND);
 }
 
 int getval(char *str) {
@@ -262,10 +260,7 @@ int getval(char *str) {
     if (sbcount >= TBLSIZE)
         error(RUNOUT);
     
-    strcpy(table[sbcount].name, str);
-    table[sbcount].val = 0;
-    sbcount++;
-    return 0;
+    error(NOTFOUND);
 }
 
 int setval(char *str, int val) {
@@ -518,6 +513,7 @@ BTNode *factor(void) {
     return retp;
 }
 void err(ErrorType errorNum) {
+    printf("EXIT 1\n");
     if (PRINTERR) {
         fprintf(stderr, "error: ");
         switch (errorNum) {
@@ -647,17 +643,31 @@ void checkStackTop(){
         stack_top = 0;
     }
 }
+void check_addNewVariable(char *str){
+    int found = 0;
+    for(int i=0;i<sbcount;i++){
+        if(strcmp(table[i].name, str)==0){
+            found = 1;
+            break;
+        }
+    }
+    if(!found){
+        strcpy(table[sbcount].name, str);
+        table[sbcount].val = 0;
+        sbcount++;
+    }
+}
 void printCode(BTNode *root){
     if(root->data==INT){
         printf("MOV r%d %d\n", stack_top, atoi(root->lexeme));
-        //fprintf(stdout, "MOV r%d %d\n", stack_top, atoi(root->lexeme));
     }
+    //FIXME: getval should adding new variable to the table, if a variable is not found, there should be an error
+    //TODO: should add a new function to add new variable to the table
     if(root->data==ID){
         int pos = 0;
-        getval(root->lexeme);
+        check_addNewVariable(root->lexeme);
         pos = getpos(root->lexeme);
         printf("MOV r%d [%d]\n", stack_top, pos);
-        //fprintf(stdout, "MOV r%d [%d]\n", stack_top, pos);
     }
     if(root->data==INCDEC){
         int pos = 0;
@@ -666,11 +676,9 @@ void printCode(BTNode *root){
         if(strcmp(root->lexeme, "++")==0){
             printf("MOV r%d 1\n", stack_top);
             printf("ADD r%d r%d\n", stack_top-1, stack_top);
-            //fprintf(stdout, "ADD r%d 1\n", stack_top);
         }else if(strcmp(root->lexeme, "--")==0){
             printf("MOV r%d 1\n", stack_top);
             printf("SUB r%d r%d\n", stack_top-1, stack_top);
-            //fprintf(stdout, "SUB r%d 1\n", stack_top);
         }
         printf("MOV [%d] r%d\n", pos, stack_top-1);
         stack_top--;
@@ -678,32 +686,25 @@ void printCode(BTNode *root){
     if(root->data==ADDSUB){//TODO: think about how to implement this
         if(strcmp(root->lexeme, "+")==0){
             printf("ADD r%d r%d\n", stack_top-2, stack_top-1);
-            //fprintf(stdout, "ADD r%d r%d\n", stack_top-2, stack_top-1);
         }else if(strcmp(root->lexeme, "-")==0){
             printf("SUB r%d r%d\n", stack_top-2, stack_top-1);
-            //fprintf(stdout, "SUB r%d r%d\n", stack_top-2, stack_top-1);
         }
         stack_top--;
     }if(root->data==MULDIV){
         if(strcmp(root->lexeme, "*")==0){
             printf("MUL r%d r%d\n", stack_top-2, stack_top-1);
-            //fprintf(stdout, "MUL r%d r%d\n", stack_top-2, stack_top-1);
         }else if(strcmp(root->lexeme, "/")==0){
             printf("DIV r%d r%d\n", stack_top-2, stack_top-1);
-            //fprintf(stdout, "DIV r%d r%d\n", stack_top-2, stack_top-1);
         }
         stack_top--;
     }if(root->data==OR){
         printf("OR r%d r%d\n", stack_top-2, stack_top-1);
-        //fprintf(stdout, "OR r%d r%d\n", stack_top-2, stack_top-1);
         stack_top--;
     }if(root->data==AND){
         printf("AND r%d r%d\n", stack_top-2, stack_top-1);
-        //fprintf(stdout, "AND r%d r%d\n", stack_top-2, stack_top-1);
         stack_top--;
     }if(root->data==XOR){
         printf("XOR r%d r%d\n", stack_top-2, stack_top-1);
-        //fprintf(stdout, "XOR r%d r%d\n", stack_top-2, stack_top-1);
         stack_top--;
     }
 }
@@ -714,18 +715,10 @@ void printAssemble(BTNode *root) {
     if (root->left != NULL && root->right!=NULL) {
         if(root->data==ASSIGN){
             printAssemble(root->right);
-            getval(root->left->lexeme);
+            check_addNewVariable(root->left->lexeme);
             int pos = 0;
             pos = getpos(root->left->lexeme);
-            /*for(int i=0;i<sbcount;i++){
-                if(strcmp(table[i].name, root->left->lexeme)==0){
-                    pos = i*4;
-                    break;
-                }
-            }*/
             printf("MOV [%d] r%d\n", pos, stack_top-1);
-            //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
-            //stack_top--;
         }
         else{
             printAssemble(root->left);
@@ -786,7 +779,6 @@ main
 int main() {
     //freopen("input.txt", "w", stdout);
     initTable();
-    //printf(">> ");
     while (1) {
         statement();
     }
