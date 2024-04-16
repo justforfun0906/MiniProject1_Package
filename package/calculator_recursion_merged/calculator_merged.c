@@ -661,8 +661,6 @@ void printCode(BTNode *root){
     if(root->data==INT){
         printf("MOV r%d %d\n", stack_top, atoi(root->lexeme));
     }
-    //FIXME: getval should adding new variable to the table, if a variable is not found, there should be an error
-    //TODO: should add a new function to add new variable to the table
     if(root->data==ID){
         int pos = 0;
         check_addNewVariable(root->lexeme);
