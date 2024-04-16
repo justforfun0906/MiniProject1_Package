@@ -11,4 +11,5 @@ extern void printPrefix(BTNode *root);
 extern void printPostfix(BTNode *root);
 extern void printAssemble(BTNode *root);
 extern int stack_top;
+extern int memory_queue_back;
 #endif // __CODEGEN__

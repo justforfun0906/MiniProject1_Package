@@ -3,6 +3,7 @@
 #include <string.h>
 #include "codeGen.h"
 int stack_top = 0;
+int memory_queue_back = 252;
 int evaluateTree(BTNode *root) {
     int retval = 0, lv = 0, rv = 0;
 
@@ -86,6 +87,13 @@ int evaluateTree(BTNode *root) {
         }
     }
     return retval;
+}
+void checkStackTop(){
+    if(stack_top>6){//TODO: move 4 reg to memory
+    }
+    if(stack_top<2&&memory_queue_back<252){//TODO:move 4 memory to reg{
+        stack_top = 0;
+    }
 }
 void printCode(BTNode *root){
     if(root->data==INT){
@@ -176,6 +184,7 @@ void printAssemble(BTNode *root) {
         printCode(root);
         stack_top++;
     }
+    checkStackTop();
     return;
 }
 

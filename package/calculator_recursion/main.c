@@ -29,7 +29,7 @@
 //		   	      ADDSUB LPAREN expr RPAREN
 
 int main() {
-    freopen("input.txt", "w", stdout);
+    //freopen("input.txt", "w", stdout);
     initTable();
     //printf(">> ");
     while (1) {
