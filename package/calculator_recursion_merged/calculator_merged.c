@@ -26,22 +26,18 @@ extern void advance(void);
 
 // Get the lexeme of the current token
 extern char *getLexeme(void);
-static TokenSet getToken(void);
-static TokenSet curToken = UNKNOWN;
-static char lexeme[MAXLEN];
-static int isVariableName(char c){
-    return isdigit(c) || c=='_'||isalpha(c);
-}
 
 // for parser
 #define TBLSIZE 64
+
 // Set PRINTERR to 1 to print error message while calling error()
 // Make sure you set PRINTERR to 0 before you submit your code
-#define PRINTERR 0
+#define PRINTERR 1
 
 // Call this macro to print error message and exit the program
 // This will also print where you called it in your program
 #define error(errorNum) { \
+    printf("the expression cannot be evaluated\n"); \
     if (PRINTERR) \
         fprintf(stderr, "error() called at %s:%d: ", __FILE__, __LINE__); \
     err(errorNum); \
@@ -63,58 +59,68 @@ typedef struct _Node {
     TokenSet data;
     int val;
     char lexeme[MAXLEN];
-    struct _Node *left;
+    struct _Node *left; 
     struct _Node *right;
 } BTNode;
 
-int sbcount = 0;
-Symbol table[TBLSIZE];
+// The symbol table
+extern Symbol table[TBLSIZE];
 
 // Initialize the symbol table with builtin variables
-void initTable(void);
-// Get the position of a variable in the symbol table
-int getpos(char *str);
+extern void initTable(void);
+
 // Get the value of a variable
-int getval(char *str);
+extern int getval(char *str);
+extern int getpos(char *str);
+
 // Set the value of a variable
-int setval(char *str, int val);
+extern int setval(char *str, int val);
+
 // Make a new node according to token type and lexeme
-BTNode *makeNode(TokenSet tok, const char *lexe);
+extern BTNode *makeNode(TokenSet tok, const char *lexe);
+
 // Free the syntax tree
- void freeTree(BTNode *root);
- void statement(void);
- BTNode *assign_expr(void);
- BTNode *or_expr(void);
- BTNode *or_expr_tail(BTNode *left);
- BTNode *and_expr(void);
- BTNode *and_expr_tail(BTNode *left);
- BTNode *xor_expr(void);
- BTNode *xor_expr_tail(BTNode *left);
- BTNode *addsub_expr(void);
- BTNode *addsub_expr_tail(BTNode *left);
- BTNode *muldiv_expr(void);
- BTNode *muldiv_expr_tail(BTNode *left);
- BTNode *unary_expr(void);
- BTNode *factor(void);
+extern void freeTree(BTNode *root);
+extern void statement(void);
+extern BTNode *assign_expr(void);
+extern BTNode *or_expr(void);
+extern BTNode *or_expr_tail(BTNode *left);
+extern BTNode *and_expr(void);
+extern BTNode *and_expr_tail(BTNode *left);
+extern BTNode *xor_expr(void);
+extern BTNode *xor_expr_tail(BTNode *left);
+extern BTNode *addsub_expr(void);
+extern BTNode *addsub_expr_tail(BTNode *left);
+extern BTNode *muldiv_expr(void);
+extern BTNode *muldiv_expr_tail(BTNode *left);
+extern BTNode *unary_expr(void);
+extern BTNode *factor(void);
+
 // Print error message and exit the program
-void err(ErrorType errorNum);
+extern void err(ErrorType errorNum);
+extern int sbcount;
 
 // for codeGen
 // Evaluate the syntax tree
-int evaluateTree(BTNode *root);
-// Print the syntax tree in prefix
-void printPrefix(BTNode *root);
+extern int evaluateTree(BTNode *root);
 
 // Print the syntax tree in prefix
-void printPostfix(BTNode *root);
-void printAssemble(BTNode *root);
-int stack_top=0;
-int memory_queue_back=252;
+extern void printPrefix(BTNode *root);
+extern void printPostfix(BTNode *root);
+extern void printAssemble(BTNode *root);
+extern int stack_top;
+extern int memory_queue_back;
 
 /*============================================================================================
 lex implementation
 ============================================================================================*/
 
+static TokenSet getToken(void);
+static TokenSet curToken = UNKNOWN;
+static char lexeme[MAXLEN];
+static int isVariableName(char c){
+    return isdigit(c) || c=='_'||isalpha(c);
+}
 TokenSet getToken(void)
 {
     int i = 0;
@@ -132,18 +138,27 @@ TokenSet getToken(void)
             c = fgetc(stdin);
         }
         ungetc(c, stdin);
+        if(i>=MAXLEN){//TODO: check is there an error type is for this case
+            fprintf(stderr, "Number too long\n");
+            exit(0);
+        }
         lexeme[i] = '\0';
         return INT;
     } else if (c == '+' || c == '-') {
-        c = fgetc(stdin);
-        if(c=='+' || c=='-'){
-            lexeme[0] = c;
-            lexeme[1] = '\0';
+        char next_c = fgetc(stdin);
+        lexeme[0] = c;
+        if(next_c==c){
+            lexeme[1] = next_c;
+            lexeme[2] = '\0';
             return INCDEC;
-        }else if(c=='='){
-            lexeme[0] = c;
-            lexeme[1] = '\0';
+        }else if(next_c=='='){
+            lexeme[1] = next_c;
+            lexeme[2] = '\0';
             return ADDSUB_ASSIGN;
+        }else{
+            lexeme[1] = '\0';
+            ungetc(next_c, stdin);//push back next_c
+            return ADDSUB;
         }
         lexeme[0] = c;
         lexeme[1] = '\0';
@@ -164,21 +179,33 @@ TokenSet getToken(void)
     } else if (c == ')') {
         strcpy(lexeme, ")");
         return RPAREN;
-    } else if (isalpha(c)) {
-        lexeme[0] = c;
-        lexeme[1] = '\0';
-        return ID;
     } else if (c == EOF) {
         return ENDFILE;
-    }else if(c=='&'){
+    } else if(c=='&'){
         strcpy(lexeme, "&");
         return AND;
-    }else if(c=='|'){
+    } else if(c=='|'){
         strcpy(lexeme, "|");
         return OR;    
-    }else if(c=='^'){
+    } else if(c=='^'){
         strcpy(lexeme, "^");
         return XOR;
+    } else if(isVariableName(c)){//since if it is a number it is already checked
+        lexeme[0] = c;
+        c = fgetc(stdin);
+        i = 1;
+        while (isVariableName(c) && i < MAXLEN) {
+            lexeme[i] = c;
+            ++i;
+            c = fgetc(stdin);
+        }
+        ungetc(c, stdin);
+        lexeme[i] = '\0';
+        if(i>=MAXLEN){
+            fprintf(stderr, "Variable name too long\n");
+            exit(0);
+        }
+        return ID; 
     }else {
         return UNKNOWN;
     }
@@ -203,6 +230,8 @@ char *getLexeme(void) {
 parser implementation
 ============================================================================================*/
 
+Symbol table[TBLSIZE];
+int sbcount = 0;
 void initTable(void) {
     strcpy(table[0].name, "x");
     table[0].val = 0;
@@ -222,6 +251,7 @@ int getpos(char *str){
     }
     return ans;
 }
+
 int getval(char *str) {
     int i = 0;
 
@@ -231,7 +261,7 @@ int getval(char *str) {
 
     if (sbcount >= TBLSIZE)
         error(RUNOUT);
-
+    
     strcpy(table[sbcount].name, str);
     table[sbcount].val = 0;
     sbcount++;
@@ -250,7 +280,7 @@ int setval(char *str, int val) {
 
     if (sbcount >= TBLSIZE)
         error(RUNOUT);
-
+    
     strcpy(table[sbcount].name, str);
     table[sbcount].val = val;
     sbcount++;
@@ -275,11 +305,7 @@ void freeTree(BTNode *root) {
     }
 }
 
-// factor := INT | ADDSUB INT |
-//		   	 ID  | ADDSUB ID  |
-//		   	 ID ASSIGN expr |
-//		   	 LPAREN expr RPAREN |
-//		   	 ADDSUB LPAREN expr RPAREN
+// statement := ENDFILE | END | expr END
 void statement(void) {
     BTNode *retp = NULL;
     if (match(ENDFILE)) {
@@ -528,6 +554,8 @@ void err(ErrorType errorNum) {
 /*============================================================================================
 codeGen implementation
 ============================================================================================*/
+int stack_top = 0;
+int memory_queue_back = 252;
 int evaluateTree(BTNode *root) {
     int retval = 0, lv = 0, rv = 0;
 
@@ -611,6 +639,13 @@ int evaluateTree(BTNode *root) {
         }
     }
     return retval;
+}
+void checkStackTop(){
+    if(stack_top>6){//TODO: move 4 reg to memory
+    }
+    if(stack_top<2&&memory_queue_back<252){//TODO:move 4 memory to reg{
+        stack_top = 0;
+    }
 }
 void printCode(BTNode *root){
     if(root->data==INT){
@@ -701,6 +736,7 @@ void printAssemble(BTNode *root) {
         printCode(root);
         stack_top++;
     }
+    checkStackTop();
     return;
 }
 
@@ -718,7 +754,6 @@ void printPostfix(BTNode *root) {
         printf("%s ", root->lexeme);
     }
 }
-
 
 
 /*============================================================================================
