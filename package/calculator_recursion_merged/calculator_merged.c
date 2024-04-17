@@ -595,7 +595,7 @@ int evaluateTree(BTNode *root) {
                         error(DIVZERO);
                     }
                     else if(rv == 0) {
-                        retval = 0;
+                        retval = 1;
                     }
                     else retval = lv / rv;
                 }
@@ -662,6 +662,18 @@ void check_addNewVariable(char *str){
         sbcount++;
     }
 }
+void check_NewVariable(char *str){
+    int found = 0;
+    for(int i=0;i<sbcount;i++){
+        if(strcmp(table[i].name, str)==0){
+            found = 1;
+            break;
+        }
+    }
+    if(!found){
+        error(NOTFOUND);
+    }
+}
 void printCode(BTNode *root){
     if(root->data==INT){
         printf("MOV r%d %d\n", stack_top, atoi(root->lexeme));
@@ -670,7 +682,7 @@ void printCode(BTNode *root){
     //TODO: should add a new function to add new variable to the table
     if(root->data==ID){
         int pos = 0;
-        check_addNewVariable(root->lexeme);
+        check_NewVariable(root->lexeme);
         pos = getpos(root->lexeme);
         printf("MOV r%d [%d]\n", stack_top, pos);
     }
