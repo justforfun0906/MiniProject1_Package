@@ -32,6 +32,7 @@ typedef struct {
 typedef struct _Node {
     TokenSet data;
     int val;
+    int reg;
     char lexeme[MAXLEN];
     struct _Node *left; 
     struct _Node *right;

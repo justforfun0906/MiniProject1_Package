@@ -57,6 +57,7 @@ typedef struct {
 typedef struct _Node {
     TokenSet data;
     int val;
+    int reg;
     char lexeme[MAXLEN];
     struct _Node *left; 
     struct _Node *right;
@@ -651,100 +652,89 @@ int evaluateTree(BTNode *root) {
     }
     return retval;
 }
-void checkStackTop(){
-    if(stack_top>6){//TODO: move 4 reg to memory
-    }
-    if(stack_top<2&&memory_queue_back<252){//TODO:move 4 memory to reg{
-        stack_top = 0;
-    }
+int get_depth(BTNode *root){
+    if(root==NULL)return 0;
+    int l = get_depth(root->left);
+    int r = get_depth(root->right);
+    return (l>r?l:r)+1;
 }
-void check_addNewVariable(char *str){
-    int found = 0;
-    for(int i=0;i<sbcount;i++){
-        if(strcmp(table[i].name, str)==0){
-            found = 1;
-            break;
-        }
-    }
-    if(!found){
-        strcpy(table[sbcount].name, str);
-        table[sbcount].val = 0;
-        sbcount++;
-    }
-}
-void printCode(BTNode *root){
-    if(root->data==INT){
-        printf("MOV r%d %d\n", stack_top, atoi(root->lexeme));
-    }
-    //FIXME: getval should adding new variable to the table, if a variable is not found, there should be an error
-    //TODO: should add a new function to add new variable to the table
+void print_allocate(BTNode *root){
     if(root->data==ID){
-        int pos = 0;
-        check_addNewVariable(root->lexeme);
-        pos = getpos(root->lexeme);
-        printf("MOV r%d [%d]\n", stack_top, pos);
+
+        printf("MOV R%d, [%d]\n", root->reg, getpos(root->lexeme));
+    }else if(root->data==INT){
+        printf("MOV R%d, %s\n", root->reg, root->lexeme);
     }
-    if(root->data==INCDEC){
-        int pos = 0;
-        pos = getpos(root->left->lexeme);
-        printf("MOV r%d [%d]\n", stack_top++, pos);
-        if(strcmp(root->lexeme, "++")==0){
-            printf("MOV r%d 1\n", stack_top);
-            printf("ADD r%d r%d\n", stack_top-1, stack_top);
-        }else if(strcmp(root->lexeme, "--")==0){
-            printf("MOV r%d 1\n", stack_top);
-            printf("SUB r%d r%d\n", stack_top-1, stack_top);
-        }
-        printf("MOV [%d] r%d\n", pos, stack_top-1);
-        stack_top--;
+    else{
+        error(SYNTAXERR);
     }
-    if(root->data==ADDSUB){//TODO: think about how to implement this
-        if(strcmp(root->lexeme, "+")==0){
-            printf("ADD r%d r%d\n", stack_top-2, stack_top-1);
-        }else if(strcmp(root->lexeme, "-")==0){
-            printf("SUB r%d r%d\n", stack_top-2, stack_top-1);
-        }
-        stack_top--;
-    }if(root->data==MULDIV){
-        if(strcmp(root->lexeme, "*")==0){
-            printf("MUL r%d r%d\n", stack_top-2, stack_top-1);
-        }else if(strcmp(root->lexeme, "/")==0){
-            printf("DIV r%d r%d\n", stack_top-2, stack_top-1);
-        }
-        stack_top--;
-    }if(root->data==OR){
-        printf("OR r%d r%d\n", stack_top-2, stack_top-1);
-        stack_top--;
-    }if(root->data==AND){
-        printf("AND r%d r%d\n", stack_top-2, stack_top-1);
-        stack_top--;
-    }if(root->data==XOR){
-        printf("XOR r%d r%d\n", stack_top-2, stack_top-1);
-        stack_top--;
-    }
+    root->reg = stack_top++;
 }
-//TODO: check where the stack_top is wrong(overly decreased)
-//TODO: check the ADDSUB_ASSIGN and INCDEC (no more ADDSUB_ASSIGN)
-//FIXME: INCDEC doesn't make the value stored in the memory
-void printAssemble(BTNode *root) {
-    if (root->left != NULL && root->right!=NULL) {
-        if(root->data==ASSIGN){
-            printAssemble(root->right);
-            check_addNewVariable(root->left->lexeme);
-            int pos = 0;
-            pos = getpos(root->left->lexeme);
-            printf("MOV [%d] r%d\n", pos, stack_top-1);
-        }
-        else{
-            printAssemble(root->left);
-            printAssemble(root->right);
-            printCode(root);
-        }
-    }else{//leaf node
-        printCode(root);
-        stack_top++;
+void print_assign(BTNode *root){
+    if(root->left->data!=ID){
+        error(SYNTAXERR);
     }
-    checkStackTop();
+    printAssemble(root->right);
+    printf("MOV [%d], R%d\n", getpos(root->left->lexeme), root->right->reg);
+    root->reg = root->right->reg;
+}
+void print_Arith(BTNode* root){
+    //TODO: think about the situation that some of the reg are put in the memory
+    //in such case, which reg should be set as the former one?
+    //also, how should we ensure the set is still correct?
+    if(get_depth(root->left)>=get_depth(root->right)){
+        printAssemble(root->left);
+        printAssemble(root->right);
+    }else{
+        printAssemble(root->right);
+        printAssemble(root->left);
+    }
+    int former_reg, latter_reg;
+    if(root->left->reg > root->right->reg){//right reg is smaller
+        former_reg = root->right->reg;
+        latter_reg = root->left->reg;
+    }else{//left reg is smaller
+        former_reg = root->left->reg;
+        latter_reg = root->right->reg;
+    }
+    switch(root->lexeme[0]){
+        case '+':
+            printf("ADD r%d r%d\n", former_reg, latter_reg);
+            break;
+        case '-':
+            printf("SUB r%d r%d\n", former_reg, latter_reg);
+            break;
+        case '*':
+            printf("MUL r%d r%d\n", former_reg, latter_reg);
+            break;
+        case '/':
+            printf("DIV r%d r%d\n", former_reg, latter_reg);
+            break;
+        case '|':
+            printf("OR r%d r%d\n", former_reg, latter_reg);
+            break;
+        case '^':
+            printf("XOR r%d r%d\n", former_reg, latter_reg);
+            break;
+        case '&':
+            printf("AND r%d r%d\n", former_reg, latter_reg);
+            break;
+        default:
+            error(SYNTAXERR);
+    }
+    root->reg = former_reg;
+    stack_top--;
+}
+//adapt to new framework
+void printAssemble(BTNode *root) {
+    if(root==NULL)return;
+    if(root->data == ID||root->data == INT){
+        print_allocate(root);
+    }else if(root->data == ASSIGN){
+        print_assign(root);
+    }else{
+        print_Arith(root);
+    }
     return;
 }
 
