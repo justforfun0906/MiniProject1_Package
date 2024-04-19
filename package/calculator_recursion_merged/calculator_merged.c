@@ -706,7 +706,7 @@ void print_Arith(BTNode* root){
     //TODO: think about the situation that some of the reg are put in the memory
     //in such case, which reg should be set as the former one?
     //also, how should we ensure the set is still correct?
-    int need_release = stack_top == 7;
+    int need_release = stack_top == 2;
     if(need_release){
         printf("MOV [%d] r6\n", mem*4);
         stack_top--;
