@@ -108,12 +108,12 @@ int get_depth(BTNode *root){
     int r = get_depth(root->right);
     return (l>r?l:r)+1;
 }
+//FIXME: error occur input = ++b
 void print_allocate(BTNode *root){
     if(root->data==ID){
-
-        printf("MOV R%d, [%d]\n", root->reg, getpos(root->lexeme));
+        printf("MOV r%d, [%d]\n", stack_top, getpos(root->lexeme));
     }else if(root->data==INT){
-        printf("MOV R%d, %s\n", root->reg, root->lexeme);
+        printf("MOV r%d, %s\n", stack_top, root->lexeme);
     }
     else{
         error(SYNTAXERR);
@@ -125,7 +125,7 @@ void print_assign(BTNode *root){
         error(SYNTAXERR);
     }
     printAssemble(root->right);
-    printf("MOV [%d], R%d\n", getpos(root->left->lexeme), root->right->reg);
+    printf("MOV [%d], r%d\n", getpos(root->left->lexeme), root->right->reg);
     root->reg = root->right->reg;
 }
 void print_Arith(BTNode* root){

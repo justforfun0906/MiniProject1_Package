@@ -66,6 +66,7 @@ BTNode *makeNode(TokenSet tok, const char *lexe) {
     strcpy(node->lexeme, lexe);
     node->data = tok;
     node->val = 0;
+    node->reg = -1;
     node->left = NULL;
     node->right = NULL;
     return node;
