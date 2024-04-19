@@ -701,10 +701,17 @@ void print_assign(BTNode *root){
     printf("MOV [%d], r%d\n", getpos(root->left->lexeme), root->right->reg);
     root->reg = root->right->reg;
 }
+static int mem = 63;
 void print_Arith(BTNode* root){
     //TODO: think about the situation that some of the reg are put in the memory
     //in such case, which reg should be set as the former one?
     //also, how should we ensure the set is still correct?
+    int need_release = stack_top == 7;
+    if(need_release){
+        printf("MOV [%d] r6\n", mem*4);
+        stack_top--;
+        mem--;
+    }
     if(get_depth(root->left)>=get_depth(root->right)){
         printAssemble(root->left);
         printAssemble(root->right);
@@ -719,6 +726,15 @@ void print_Arith(BTNode* root){
     }else{//left reg is smaller
         former_reg = root->left->reg;
         latter_reg = root->right->reg;
+    }
+    if(need_release){
+    //swap the reg
+    //if realease is needed
+    //to make sure the result is stored at r7
+    //making the r6 available for the memory
+        int temp = former_reg;
+        former_reg = latter_reg;
+        latter_reg = temp;
     }
     switch(root->lexeme[0]){
         case '+':
@@ -752,7 +768,10 @@ void print_Arith(BTNode* root){
             error(SYNTAXERR);
     }
     root->reg = former_reg;
-    stack_top--;
+    if(need_release)
+        printf("MOV r6 [%d]\n", (++mem)*4);
+    else
+        stack_top--;
 }
 //adapt to new framework
 void printAssemble(BTNode *root) {
