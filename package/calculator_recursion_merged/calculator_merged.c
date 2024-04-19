@@ -495,9 +495,16 @@ BTNode *factor(void) {
         retp = makeNode(ID, getLexeme());
         advance();
     } else if (match(INCDEC)) {//INCDEC must be followed by ID
-        retp = makeNode(INCDEC, getLexeme());
+        char* str=malloc(sizeof(char)*MAXLEN);
+        strcpy(str, getLexeme());
+        retp = makeNode(ASSIGN, "=");
         advance();
         if (match(ID)) {
+            if(str[0]=='+')retp->right = makeNode(ADDSUB, "+");
+            else retp->right = makeNode(ADDSUB, "-");
+            BTNode* temp_left = makeNode(ID, getLexeme());
+            retp->right->left = temp_left;
+            retp->right->right = makeNode(INT, "1");
             retp->left = makeNode(ID, getLexeme());
             advance();
         } else {
@@ -659,9 +666,23 @@ int get_depth(BTNode *root){
     int r = get_depth(root->right);
     return (l>r?l:r)+1;
 }
+int check_addNewVar(char* str){
+    int found = 0;
+    for(int i = 0;i<sbcount;i++){
+        if(strcmp(table[i].name, str)==0){
+            found = 1;
+            break;
+        }
+    }
+    if(!found){
+        strcpy(table[sbcount].name, str);
+        table[sbcount].val = 0;
+        sbcount++;
+    }
+}
 void print_allocate(BTNode *root){
     if(root->data==ID){
-
+        check_addNewVar(root->lexeme);
         printf("MOV r%d, [%d]\n", stack_top, getpos(root->lexeme));
     }else if(root->data==INT){
         printf("MOV r%d, %s\n", stack_top, root->lexeme);
@@ -675,6 +696,7 @@ void print_assign(BTNode *root){
     if(root->left->data!=ID){
         error(SYNTAXERR);
     }
+    check_addNewVar(root->left->lexeme);
     printAssemble(root->right);
     printf("MOV [%d], r%d\n", getpos(root->left->lexeme), root->right->reg);
     root->reg = root->right->reg;
@@ -703,13 +725,19 @@ void print_Arith(BTNode* root){
             printf("ADD r%d r%d\n", former_reg, latter_reg);
             break;
         case '-':
-            printf("SUB r%d r%d\n", former_reg, latter_reg);
+            printf("SUB r%d r%d\n", root->left->reg, root->right->reg);
+            if(root->left->reg!=former_reg){
+                printf("MOV r%d r%d\n", former_reg, root->left->reg);
+            }
             break;
         case '*':
             printf("MUL r%d r%d\n", former_reg, latter_reg);
             break;
         case '/':
-            printf("DIV r%d r%d\n", former_reg, latter_reg);
+            printf("DIV r%d r%d\n", root->left->reg, root->right->reg);
+            if(root->left->reg!=former_reg){
+                printf("MOV r%d r%d\n", former_reg, root->left->reg);
+            }
             break;
         case '|':
             printf("OR r%d r%d\n", former_reg, latter_reg);
@@ -783,7 +811,7 @@ main
 //		   	      ADDSUB LPAREN expr RPAREN
 
 int main() {
-    //freopen("input.txt", "w", stdout);
+    freopen("input.txt", "w", stdout);
     initTable();
     while (1) {
         statement();
