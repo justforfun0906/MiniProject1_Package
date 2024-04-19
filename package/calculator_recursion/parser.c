@@ -91,15 +91,7 @@ void statement(void) {
     } else {
         retp = assign_expr();
         if (match(END)) {
-            /*printf("%d\n", evaluateTree(retp));
-            printf("Prefix traversal: ");
-            printPrefix(retp);
-            printf("\n");
-            printf("Postfix traversal: ");
-            printPostfix(retp);
-            printf("\n");
-            printf("Assembly code: \n");
-            */
+            int temp = evaluateTree(retp);
             printAssemble(retp);
             freeTree(retp);
             //printf(">> ");
@@ -292,7 +284,7 @@ BTNode *factor(void) {
     return retp;
 }
 void err(ErrorType errorNum) {
-    printf("EXIT 1\n")
+    printf("EXIT 1\n");
     if (PRINTERR) {
         fprintf(stderr, "error: ");
         switch (errorNum) {

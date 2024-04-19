@@ -4,6 +4,16 @@
 #include "codeGen.h"
 int stack_top = 0;
 int memory_queue_back = 252;
+int check_hasID(BTNode *root){
+    if(root->data==ID)return 1;
+    if(root->left!=NULL){
+        if(check_hasID(root->left))return 1;
+    }
+    if(root->right!=NULL){
+        if(check_hasID(root->right))return 1;
+    }
+    return 0;
+}
 int evaluateTree(BTNode *root) {
     int retval = 0, lv = 0, rv = 0;
 
@@ -42,9 +52,13 @@ int evaluateTree(BTNode *root) {
                 } else if (strcmp(root->lexeme, "*") == 0) {
                     retval = lv * rv;
                 } else if (strcmp(root->lexeme, "/") == 0) {
-                    if (rv == 0)
+                    if(rv==0&&check_hasID(root->right)==0){
                         error(DIVZERO);
-                    retval = lv / rv;
+                    }else if(rv==0){
+                        retval = 1;
+                    }else{
+                        retval = lv / rv;
+                    }
                 }
                 break;
             case INCDEC:
@@ -87,13 +101,6 @@ int evaluateTree(BTNode *root) {
         }
     }
     return retval;
-}
-void checkStackTop(){
-    if(stack_top>6){//TODO: move 4 reg to memory
-    }
-    if(stack_top<2&&memory_queue_back<252){//TODO:move 4 memory to reg{
-        stack_top = 0;
-    }
 }
 void printCode(BTNode *root){
     if(root->data==INT){
@@ -155,36 +162,16 @@ void printCode(BTNode *root){
         stack_top--;
     }
 }
-//TODO: check where the stack_top is wrong(overly decreased)
-//TODO: check the ADDSUB_ASSIGN and INCDEC (no more ADDSUB_ASSIGN)
-//FIXME: INCDEC doesn't make the value stored in the memory
+//TODO: adept to new framework
 void printAssemble(BTNode *root) {
-    if (root->left != NULL && root->right!=NULL) {
-        if(root->data==ASSIGN){
-            printAssemble(root->right);
-            getval(root->left->lexeme);
-            int pos = 0;
-            pos = getpos(root->left->lexeme);
-            /*for(int i=0;i<sbcount;i++){
-                if(strcmp(table[i].name, root->left->lexeme)==0){
-                    pos = i*4;
-                    break;
-                }
-            }*/
-            printf("MOV [%d] r%d\n", pos, stack_top-1);
-            //fprintf(stdout, "MOV r%d [%d]\n", pos, stack_top-1);
-            //stack_top--;
-        }
-        else{
-            printAssemble(root->left);
-            printAssemble(root->right);
-            printCode(root);
-        }
-    }else{//leaf node
-        printCode(root);
-        stack_top++;
+    if(root==NULL)return;
+    if(root->data == ID||root->data == INT){
+        print_allocate(root);
+    }else if(root->data == ASSIGN){
+        print_assign(root);
+    }else{
+        print_Arith(root);
     }
-    checkStackTop();
     return;
 }
 
