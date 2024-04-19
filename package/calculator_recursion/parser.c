@@ -66,7 +66,7 @@ BTNode *makeNode(TokenSet tok, const char *lexe) {
     strcpy(node->lexeme, lexe);
     node->data = tok;
     node->val = 0;
-    node->reg = -1;
+    node->reg = 0;
     node->left = NULL;
     node->right = NULL;
     return node;
@@ -264,9 +264,16 @@ BTNode *factor(void) {
         retp = makeNode(ID, getLexeme());
         advance();
     } else if (match(INCDEC)) {//INCDEC must be followed by ID
-        retp = makeNode(INCDEC, getLexeme());
+        char* str=malloc(sizeof(char)*MAXLEN);
+        strcpy(str, getLexeme());
+        retp = makeNode(ASSIGN, "=");
         advance();
         if (match(ID)) {
+            if(str[0]=='+')retp->right = makeNode(ADDSUB, "+");
+            else retp->right = makeNode(ADDSUB, "-");
+            BTNode* temp_left = makeNode(ID, getLexeme());
+            retp->right->left = temp_left;
+            retp->right->right = makeNode(INT, "1");
             retp->left = makeNode(ID, getLexeme());
             advance();
         } else {

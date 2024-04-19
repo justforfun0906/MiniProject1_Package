@@ -108,7 +108,6 @@ int get_depth(BTNode *root){
     int r = get_depth(root->right);
     return (l>r?l:r)+1;
 }
-//FIXME: error occur input = ++b
 void print_allocate(BTNode *root){
     if(root->data==ID){
         printf("MOV r%d, [%d]\n", stack_top, getpos(root->lexeme));
